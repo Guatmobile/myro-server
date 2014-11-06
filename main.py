@@ -15,12 +15,14 @@
 # limitations under the License.
 #
 
-import random
 import webapp2
+import random
+import json
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write(random.randint(0,1))
+        randList = [random.randint(0,1) for i in range(16)]
+        self.response.write(json.dumps(randList))
 
 
 app = webapp2.WSGIApplication([
