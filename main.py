@@ -21,7 +21,7 @@ import json
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        randList = [random.randint(0,1) for i in range(16)]
+        randList = [[random.randint(0,1) for j in range(4)] for i in range(4)]
         self.response.write(json.dumps(randList))
 
 
