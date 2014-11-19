@@ -38,12 +38,30 @@ class MainHandler(webapp2.RequestHandler):
             item.delete()
 
         if(element != "['6969']"):
-            self.response.write('Incorrect Code');
+            return;
 
         randList = [random.randint(0,1) for i in range(9)]
+        make_request(data)
         self.response.write(json.dumps(randList))
         code = Code(columns = randList)
         c_key = code.put()
+
+    def make_request(data):
+        json_data = {
+            "collapse_key" : "msg",
+            "data" : data
+            "registration_ids": ['1'],
+        }
+
+        url = 'https://android.googleapis.com/gcm/send'
+        myKey = "AIzaSyAD9SQqeWGcrSprGEkrjgbeTgEmVbloVFg"
+        data = json.dumps(json_data)
+        headers = {'Content-Type': 'application/json', 'Authorization': 'key=%s' % myKey}
+        req = urllib2.Request(url, data, headers)
+        f = urllib2.urlopen(req)
+        response = json.loads(f.read())
+
+        ''' self.response.out.write(json.dumps(response,sort_keys=True, indent=2) ) '''
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
