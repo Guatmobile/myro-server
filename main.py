@@ -18,13 +18,35 @@
 import webapp2
 import random
 import json
+import urlparse
+import time
+from google.appengine.ext import db
+
+class Code(db.Model):
+    columns = db.ListProperty(long, required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        randList = [[random.randint(0,1) for j in range(4)] for i in range(4)]
-        self.response.write(json.dumps(randList))
+        #check url
+        url = self.request.url
+        parsed = urlparse.urlparse(url)
+        element = str(urlparse.parse_qs(parsed.query)['key'])
 
+        db_items = Code.all()
+        for item in db_items:
+            item.delete()
+
+        if(element != "['6969']"):
+            self.response.write('Incorrect Code');
+
+        randList = [random.randint(0,1) for i in range(9)]
+        self.response.write(json.dumps(randList))
+        code = Code(columns = randList)
+        c_key = code.put()
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
 ], debug=True)
+
+
