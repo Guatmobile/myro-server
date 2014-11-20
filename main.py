@@ -28,13 +28,13 @@ class MainHandler(webapp2.RequestHandler):
         randList[0] = 1
         randList[8] = 1
 
-        self.make_request(randList, check)
+        self.make_request(randList)
         self.response.write(json.dumps(randList))
 
         code = Code(columns = randList)
         c_key = code.put()
 
-    def make_request(self, randList, check):
+    def make_request(self, randList):
         json_data = {
             "collapse_key" : "msg",
             "data" : {
