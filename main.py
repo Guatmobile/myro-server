@@ -25,16 +25,21 @@ class MainHandler(webapp2.RequestHandler):
             return;
 
         randList = [random.randint(0,1) for i in range(9)]
-        self.make_request(randList)
+        randList[0] = 1
+        randList[8] = 1
+
+        self.make_request(randList, check)
         self.response.write(json.dumps(randList))
+
         code = Code(columns = randList)
         c_key = code.put()
 
-    def make_request(self, randList):
+    def make_request(self, randList, check):
         json_data = {
             "collapse_key" : "msg",
             "data" : {
-                "random_list": randList
+                "random_list": randList,
+                "identifier": 0
             },
             "registration_ids": ['APA91bGnfiwRXsiRUy8mXC-lIasZmWvme6sC3NthuxYv1gIUyASHZT_nXt3xmXZa4emveDhUHq1l-hxrEmJ4qf0TEZujf_LxWV3IcMgkYherEhL8KygIh3kmtKwzvBUN5gZSWkRL3jfVoi45bH2p4wG8LIEAhfi7mTdTt7QUYz_t8TS4IgvMb8E']
         }
@@ -48,6 +53,35 @@ class MainHandler(webapp2.RequestHandler):
         response = json.loads(f.read())
         # self.response.out.write(json.dumps(response,sort_keys=True, indent=2) )
 
+class CheckHandler(webapp2.RequestHandler):
+    def get(self):
+        #check url
+        url = self.request.url
+        parsed = urlparse.urlparse(url)
+        check = str(urlparse.parse_qs(parsed.query)['check'])
+        self.response.write(check)
+        self.make_request(check)
+
+    def make_request(self, check):
+        json_data = {
+            "collapse_key" : "msg",
+            "data" : {
+                "correct_code": check,
+                "identifier": 1
+            },
+            "registration_ids": ['APA91bGnfiwRXsiRUy8mXC-lIasZmWvme6sC3NthuxYv1gIUyASHZT_nXt3xmXZa4emveDhUHq1l-hxrEmJ4qf0TEZujf_LxWV3IcMgkYherEhL8KygIh3kmtKwzvBUN5gZSWkRL3jfVoi45bH2p4wG8LIEAhfi7mTdTt7QUYz_t8TS4IgvMb8E']
+        }
+        url = 'https://android.googleapis.com/gcm/send'
+        myKey = "AIzaSyAD9SQqeWGcrSprGEkrjgbeTgEmVbloVFg"
+        data = json.dumps(json_data)
+        headers = {'Content-Type': 'application/json', 'Authorization': 'key=%s' % myKey}
+        req = urllib2.Request(url, data, headers)
+        f = urllib2.urlopen(req)
+        response = json.loads(f.read())
+        # self.response.out.write(json.dumps(response,sort_keys=True, indent=2) )
+
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/2', CheckHandler)
 ], debug=True)
+
