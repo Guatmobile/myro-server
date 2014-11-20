@@ -1,25 +1,9 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 import webapp2
 import random
 import json
 import urlparse
 import time
+import urllib2
 from google.appengine.ext import db
 
 class Code(db.Model):
@@ -41,16 +25,18 @@ class MainHandler(webapp2.RequestHandler):
             return;
 
         randList = [random.randint(0,1) for i in range(9)]
-        make_request(data)
+        self.make_request(randList)
         self.response.write(json.dumps(randList))
         code = Code(columns = randList)
         c_key = code.put()
 
-    def make_request(data):
+    def make_request(self, randList):
         json_data = {
             "collapse_key" : "msg",
-            "data" : data
-            "registration_ids": ['1'],
+            "data" : {
+                "random_list": randList
+            },
+            "registration_ids": ['APA91bGnfiwRXsiRUy8mXC-lIasZmWvme6sC3NthuxYv1gIUyASHZT_nXt3xmXZa4emveDhUHq1l-hxrEmJ4qf0TEZujf_LxWV3IcMgkYherEhL8KygIh3kmtKwzvBUN5gZSWkRL3jfVoi45bH2p4wG8LIEAhfi7mTdTt7QUYz_t8TS4IgvMb8E']
         }
 
         url = 'https://android.googleapis.com/gcm/send'
@@ -60,11 +46,8 @@ class MainHandler(webapp2.RequestHandler):
         req = urllib2.Request(url, data, headers)
         f = urllib2.urlopen(req)
         response = json.loads(f.read())
-
-        ''' self.response.out.write(json.dumps(response,sort_keys=True, indent=2) ) '''
+        # self.response.out.write(json.dumps(response,sort_keys=True, indent=2) )
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
 ], debug=True)
-
-
